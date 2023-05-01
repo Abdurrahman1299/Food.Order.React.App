@@ -10,22 +10,46 @@ const defaultCartState = {
 // reducer function ``USEREDUCER THING``
 function cartReducer(state, action) {
   if (action.type === "ADD") {
-    // concat method creates a new array
-    const updatedItems = state.items.concat(action.item);
     const updatedTatalAmount =
-      state.totalAmount + state.item.price * state.item.amount;
+      state.totalAmount + action.item.price * action.item.amount;
+
+    // index of existing cart item
+    const existingCartItemIndex = state.items.findIndex(
+      (item) => item.id === action.item.id
+    );
+
+    // existing cart item
+    const existingCartItem = state.items[existingCartItemIndex];
+    let updatedItems;
+
+    if (existingCartItem) {
+      // editing the existed item with the new values
+      const updatedItem = {
+        ...existingCartItem,
+        amount: existingCartItem.amount + action.item.amount,
+      };
+
+      // updating the existed cart item
+      updatedItems = [...state.items];
+      updatedItems[existingCartItemIndex] = updatedItem;
+    } else {
+      updatedItems = state.items.concat(action.item);
+    }
+
     return {
       items: updatedItems,
       totalAmount: updatedTatalAmount,
     };
   }
+
   if (action.type === "REMOVE") {
   }
+
   return defaultCartState;
 }
 
 export default function CartProvider(props) {
-  // construct the reducer function
+  // construct the reducer function && cartState is the state that will be used in the rest of application
   const [cartState, dispatchCartAction] = useReducer(
     cartReducer,
     defaultCartState
