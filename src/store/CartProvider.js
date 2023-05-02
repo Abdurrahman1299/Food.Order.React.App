@@ -36,6 +36,7 @@ function cartReducer(state, action) {
       updatedItems = state.items.concat(action.item);
     }
 
+    // we're returning object after all
     return {
       items: updatedItems,
       totalAmount: updatedTatalAmount,
@@ -43,6 +44,32 @@ function cartReducer(state, action) {
   }
 
   if (action.type === "REMOVE") {
+    // similar to the adding process when we have multible same items, but we ,here, have only the """action.id""" not """action.item.id"""
+    const existingCartItemIndex = state.items.findIndex(
+      (item) => item.id === action.id
+    );
+
+    // existing cart item
+    const existingItem = state.items[existingCartItemIndex];
+
+    // updating total amount after removing an item
+    const updatedTotalAmount = state.totalAmount - existingItem.price;
+
+    let updatedItems;
+
+    if (existingItem.amount === 1) {
+      updatedItems = state.items.filter((item) => item.id !== action.id);
+    } else {
+      const updatedItem = { ...existingItem, amount: existingItem.amount - 1 };
+      updatedItems = [...state.items];
+      updatedItems[existingCartItemIndex] = updatedItem;
+    }
+
+    // we're returning object after all
+    return {
+      items: updatedItems,
+      totalAmount: updatedTotalAmount,
+    };
   }
 
   return defaultCartState;
